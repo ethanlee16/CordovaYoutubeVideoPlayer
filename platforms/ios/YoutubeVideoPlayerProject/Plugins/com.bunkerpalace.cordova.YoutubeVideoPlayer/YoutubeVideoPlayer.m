@@ -20,9 +20,18 @@
     if (videoID != nil) {
         
         XCDYouTubeVideoPlayerViewController *videoPlayerViewController = [[XCDYouTubeVideoPlayerViewController alloc] initWithVideoIdentifier:videoID];
-        [self.viewController presentMoviePlayerViewControllerAnimated:videoPlayerViewController];
-        
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [videoPlayerViewController presentInView:null];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:^(NSNotification *)notification {
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerPlaybackDidFinishNotification object:notification.object];
+            MPMovieFinishReason finishReason = [notification.userInfo[MPMoviePlayerPlaybackDidFinishReasonUserInfoKey] integerValue];
+            if (finishReason == MPMovieFinishReasonPlaybackError)
+            {
+                NSError *error = notification.userInfo[XCDMoviePlayerPlaybackDidFinishErrorUserInfoKey];
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]];
+            }
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        }, name:MPMoviePlayerPlaybackDidFinishNotification object:videoPlayerViewController.moviePlayer];
+        [videoPlayerViewController.moviePlayer play];
         
     } else {
         
