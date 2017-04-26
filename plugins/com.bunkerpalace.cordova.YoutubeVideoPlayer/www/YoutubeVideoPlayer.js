@@ -15,5 +15,18 @@ YoutubeVideoPlayer.prototype.openVideo = function(YTid) {
 	);
 }
 
+YoutubeVideoPlayer.prototype.getVideo = function(YTid, success, error) {
+	exec(function(result) {
+		success(result);
+	},
+	function(error) {
+		error(error);
+	},
+	"YoutubeVideoPlayer",
+	"getVideo",
+	[YTid]
+	);
+}
+
 var YoutubeVideoPlayer = new YoutubeVideoPlayer();
 module.exports = YoutubeVideoPlayer
