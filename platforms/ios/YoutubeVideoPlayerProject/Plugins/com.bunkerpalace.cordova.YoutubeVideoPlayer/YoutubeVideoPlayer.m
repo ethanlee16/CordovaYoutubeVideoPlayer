@@ -67,6 +67,37 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)setMetadata:(CDVInvokedUrlCommand*) command
+{
+    NSString* name = [command.arguments objectAtIndex:0];
+    NSString* album = [command.arguments objectAtIndex:1];
+    NSString* artist = [command.arguments objectAtIndex:2];
+    NSString* artwork = [command.arguments objectAtIndex:3];
+    
+    NSURL *imageUrl = [[NSURL alloc] initWithString:artwork];
+    
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_async(queue, ^{
+        
+        NSMutableDictionary *songInfo = [NSMutableDictionary dictionary];
+        UIImage *artworkImage = [UIImage imageWithData:[NSData dataWithContentsOfURL:imageUrl]];
+        if(artworkImage)
+        {
+            MPMediaItemArtwork *albumArt = [[MPMediaItemArtwork alloc] initWithImage: artworkImage];
+            [songInfo setValue:albumArt forKey:MPMediaItemPropertyArtwork];
+            [songInfo setObject:name forKey:MPMediaItemPropertyTitle];
+            [songInfo setObject:artist forKey:MPMediaItemPropertyArtist];
+            [songInfo setObject:album forKey:MPMediaItemPropertyAlbumTitle];
+        }
+        MPNowPlayingInfoCenter *infoCenter = [MPNowPlayingInfoCenter defaultCenter];
+        infoCenter.nowPlayingInfo = songInfo;
+        CDVPluginResult* result = nil;
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    });
+}
+
+
 - (void)receiveNotification: (NSNotification *)notification {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerPlaybackDidFinishNotification object:notification.object];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"RemoteControlEventReceived" object:videoPlayerViewController.moviePlayer];

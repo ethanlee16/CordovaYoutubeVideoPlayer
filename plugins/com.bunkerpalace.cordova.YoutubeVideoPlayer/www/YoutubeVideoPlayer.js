@@ -28,5 +28,18 @@ YoutubeVideoPlayer.prototype.getVideo = function(YTid, success, error) {
 	);
 }
 
+YoutubeVideoPlayer.prototype.setMetadata = function(args, success, error) {
+	exec(function(result) {
+		success(result);
+	},
+	function(error) {
+		error(error);
+	},
+	"YoutubeVideoPlayer",
+	"setMetadata",
+	args
+	);
+}
+
 var YoutubeVideoPlayer = new YoutubeVideoPlayer();
 module.exports = YoutubeVideoPlayer
